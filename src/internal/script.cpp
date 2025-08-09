@@ -151,12 +151,13 @@ geode::Result<script*, std::string> script::getLoadedScript(const std::string& i
 }
 // luau scripts can be lua (roblox saves as) | luau (luau) | luac (luau but already in bytecode)
 geode::Result<script*, std::string> script::create(ScriptMetadata* metadata) {
-
     auto ret = new script();
     if (!ret) return Err("Script `{}` creation: Couldn't create.", metadata->id);
     ret->metadata = metadata;
   
-    ret->state = state;
+    ret->state = ret->createState();
+    if (!ret->state) return Err("Script `{}` creation: Lua State is nullptr.", metadata->id);
+    
     geode::Result<std::string> fileinfo = utils::file::readString(metadata->path);
     if (fileinfo.isErr()) {
         delete ret;
